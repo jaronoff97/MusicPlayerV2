@@ -22,6 +22,7 @@ public class Song extends ItunesTrack{
 	private String path;
 	public boolean songAtEnd=true;
 	public boolean playing=false;
+	public boolean setup=false;
     public final SimpleIntegerProperty orderName = new SimpleIntegerProperty(originalOrder);
 	@XStreamAlias("TitleName")
     public final SimpleStringProperty titleName = new SimpleStringProperty(name);
@@ -75,21 +76,35 @@ public class Song extends ItunesTrack{
 	        setOrderName(originalOrder);
 	        setPlaysName(playCount);
 	        setGenreName(genre);
+	        
 
 
 	        //System.out.println(this);
 	    }
+	 public int getOrder()
+	 {
+		 return(originalOrder);
+	 }
 	 public String returnData()
 	 {
 		 return ("Name: " + name + "\n Artist: " + artist + "\n Album: " + album);
 	 }
 	 public void play() {
+		 System.out.println("PLAYING!!!! "+toString());
+		 	if(setup==false)
+		 	{
+		 		startHandling(getPath());
+		 	}
 	        song.play();
 	        playing = true;
 	    }
 	    public void stop() {
-	        song.stop();
-	        playing = false;
+	    		if(setup==true)
+		 	{
+	    			  song.stop();
+	    		        playing = false;
+		 	}
+	      
 	    }
 	    public void pause() {
 	        song.pause();
@@ -104,6 +119,10 @@ public class Song extends ItunesTrack{
 	        }
 	    }
 	 	public MediaPlayer getSong() {
+	 		if(song==null)
+	 		{
+	 			startHandling(getPath());
+	 		}
 			return song;
 		}
 	    public void setOnEndOfMedia() {
@@ -119,16 +138,22 @@ public class Song extends ItunesTrack{
 	    	  try {
 	              final Media media = new Media(url);
 	              song = new MediaPlayer(media);
-	              media.getMetadata().addListener(new MapChangeListener<String, Object>() {
-	                  @Override
-	                  public void onChanged(Change<? extends String, ? extends Object> ch) {
-	                      if (ch.wasAdded()) {
+	              setup=true;
+	              if(name==null)
+	              {
+	            	  media.getMetadata().addListener(new MapChangeListener<String, Object>() {
+		                  @Override
+		                  public void onChanged(Change<? extends String, ? extends Object> ch) {
+		                      if (ch.wasAdded()) {
 
-	                          handleMetadata(ch.getKey(), ch.getValueAdded());
+		                          handleMetadata(ch.getKey(), ch.getValueAdded());
+		                          
 
-	                      }
-	                  }
-	              });
+		                      }
+		                  }
+		              });
+	              }
+	              
 	             
 	          } catch (RuntimeException re) {
 	              // Handle construction errors

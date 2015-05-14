@@ -1,4 +1,6 @@
 package com.musicPlayer.JML;
+
+
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -40,13 +42,41 @@ public class PlayerControl extends BorderPane {
     private GridPane infoGrid = new GridPane();
     public Text title, artist, album;
     public int indexOfGrid=0;
+    
 
+	public HBox hForwardButton = new HBox(10);
+	public Button forwardButton = new Button(">>");
+
+	public HBox hReverseButton = new HBox(10);
+	public Button reverseButton = new Button("<<");
+    
+	public  final Button playButton = new Button(">");
+    
+    public PlayerControl()
+    {
+    		setStyle(MusicPlayer.currentTheme);
+    		 Pane mvPane = new Pane() {
+    	        };
+    		mvPane.setStyle("-fx-background-color: black;");
+        setCenter(mvPane);
+        mediaBar = new HBox();
+        mediaBar.setAlignment(Pos.CENTER);
+        mediaBar.setPadding(new Insets(5, 10, 5, 10));
+        BorderPane.setAlignment(mediaBar, Pos.CENTER);
+        infoGrid.setAlignment(Pos.TOP_CENTER);
+        infoGrid.setHgap(100);
+        infoGrid.setVgap(10);
+        infoGrid.setPadding(new Insets(0, 0, 0, 0));
+        
+        setBottom(mediaBar);
+    }
     public PlayerControl(final Song s) {
         song = s;
         song.play();
-        title=new Text(s.getTitleName());
-        artist=new Text(s.getArtistName());
-        album=new Text(s.getAlbumName()); 
+        song.setPlayCount(song.getPlayCount()+1);
+        title=new Text(s.getName());
+        artist=new Text(s.getArtist());
+        album=new Text(s.getAlbum()); 
         
         System.out.println(s);
         duration = s.getSong().getMedia().getDuration();
@@ -62,13 +92,18 @@ public class PlayerControl extends BorderPane {
         mediaBar.setAlignment(Pos.CENTER);
         mediaBar.setPadding(new Insets(5, 10, 5, 10));
         BorderPane.setAlignment(mediaBar, Pos.CENTER);
-        title.setStyle("-fx-background-color: black;");
-        artist.setStyle("-fx-background-color: black;");
-        album.setStyle("-fx-background-color: black;");
         infoGrid.setAlignment(Pos.TOP_CENTER);
         infoGrid.setHgap(100);
         infoGrid.setVgap(10);
         infoGrid.setPadding(new Insets(0, 0, 0, 0));
+
+
+		hReverseButton.setAlignment(Pos.TOP_LEFT);
+        hReverseButton.getChildren().add(reverseButton);
+        
+		hForwardButton.setAlignment(Pos.TOP_LEFT);
+        hForwardButton.getChildren().add(forwardButton);
+
         
         infoGrid.add(title,1,0);
         indexOfGrid++;
@@ -79,7 +114,39 @@ public class PlayerControl extends BorderPane {
 
         setTop(infoGrid);
 
-        final Button playButton = new Button(">");
+        forwardButton.setOnAction(new EventHandler<ActionEvent>() {
+        		public void handle(ActionEvent event)
+        		{
+        			MusicPlayer.play(MusicPlayer.masterLibrary.get(MusicPlayer.playlists.get(MusicPlayer.currentPlaylist).getNext()));
+        			/*if(MusicPlayer.equalizerView.open==true)
+        			{
+        				MusicPlayer.equalizerView.setBottom(MusicPlayer.mediaControl);
+        			}
+        			else
+        			{
+        				MusicPlayer.musicBorder.setBottom(MusicPlayer.mediaControl);
+        			}*/
+        			
+        		}
+		});
+        reverseButton.setOnAction(new EventHandler<ActionEvent>() {
+    		public void handle(ActionEvent event)
+    			{
+    				MusicPlayer.play(MusicPlayer.masterLibrary.get(MusicPlayer.playlists.get(MusicPlayer.currentPlaylist).getPrev()));
+    				/*if(MusicPlayer.equalizerView.open==true)
+        			{
+        				MusicPlayer.equalizerView.setBottom(MusicPlayer.mediaControl);
+        			}
+        			else
+        			{
+        				MusicPlayer.musicBorder.setBottom(MusicPlayer.mediaControl);
+        			}*/
+    			}
+        });
+        
+        
+        
+       
 
         playButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
@@ -95,7 +162,8 @@ public class PlayerControl extends BorderPane {
                         || status == Status.STOPPED) {
                     // rewind the movie if we're sitting at the end
                     if (atEndOfMedia) {
-                    	song.getSong().seek(song.getSong().getStartTime());
+                    		forwardButton.fire();
+                    		System.out.println("AT THE END!!!!");
                         atEndOfMedia = false;
                     }
                     song.play();
@@ -104,12 +172,14 @@ public class PlayerControl extends BorderPane {
                 }
             }
         });
-        /*mp.currentTimeProperty().addListener(new InvalidationListener() {
-            public void invalidated(Observable ov) {
-                updateValues();
-                System.out.println("UPDATING VALUES FROM MP InvalidationListener");
+        song.getSong().setOnEndOfMedia(new Runnable() {
+            public void run() {
+             
+                    
+                    forwardButton.fire();
             }
-        });*/
+        });
+       
         song.getSong().currentTimeProperty().addListener(new ChangeListener<Duration>() {
             @Override
             public void changed(ObservableValue<? extends Duration> observable, Duration oldValue, Duration newValue) {
@@ -137,6 +207,7 @@ public class PlayerControl extends BorderPane {
         });
     
         song.getSong().setOnReady(new Runnable() {
+
             public void run() {
                 duration = song.getSong().getMedia().getDuration();
                 updateValues();
@@ -146,8 +217,10 @@ public class PlayerControl extends BorderPane {
                 }
             }
         });
-
+        
+        mediaBar.getChildren().add(hReverseButton);
         mediaBar.getChildren().add(playButton);
+        mediaBar.getChildren().add(hForwardButton);
         // Add spacer
         Label spacer = new Label("   ");
         mediaBar.getChildren().add(spacer);
@@ -198,10 +271,13 @@ public class PlayerControl extends BorderPane {
             }
         });
         mediaBar.getChildren().add(volumeSlider);
-        song.getSong().stop();
+        
         setBottom(mediaBar);
     }
-
+    public void stop()
+    {
+    		song.stop();
+    }
     protected void updateValues() {
         if (playTime != null && timeSlider != null && volumeSlider != null && duration != null) {
             Platform.runLater(new Runnable() {
@@ -262,4 +338,8 @@ public class PlayerControl extends BorderPane {
         infoGrid.add(child,indexOfGrid,0);
         indexOfGrid++;
     }
+	public Song getSong() {
+		// TODO Auto-generated method stub
+		return song;
+	}
 }

@@ -1,0 +1,10 @@
+<object-stream>
+  <playlist>
+    <name>Queue</name>
+    <intList>
+      <int>19</int>
+    </intList>
+    <indexOfPlaying>0</indexOfPlaying>
+    <shuffle>false</shuffle>
+  </playlist>
+</object-stream>

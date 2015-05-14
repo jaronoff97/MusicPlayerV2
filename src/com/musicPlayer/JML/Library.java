@@ -1,14 +1,11 @@
 package com.musicPlayer.JML;
 
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class Library extends Playlist{
 	public ObservableList<Song> songList = FXCollections.observableArrayList();
-	public String name=null;
-	public final SimpleStringProperty titleName = new SimpleStringProperty(name);
-	public int indexOfPlaying=0;
+	
 	public boolean shuffle=false;
 	
 	public Library(String nString) {
@@ -18,10 +15,12 @@ public class Library extends Playlist{
 	public void add(Song s)
 	{
 		songList.add(s);
+		playlist.add(s.getOrder());
 	}
 	public void remove(Song s)
 	{
 		songList.remove(s);
+		playlist.remove(s.getOrder());
 	}
 
     public int indexOf(Song s) {
@@ -39,7 +38,19 @@ public class Library extends Playlist{
 	}
 	public Song get(int i) {
 		// TODO Auto-generated method stub
+		for(Song song : songList)
+		{
+			if(song.getOrder()==i)
+			{
+				return(song);
+			}
+		}
+		
 		return songList.get(i);
+	}
+	public Song currentlyPlaying()
+	{
+		return(songList.get(indexOfPlaying));
 	}
 
 
