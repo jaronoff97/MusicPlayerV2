@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.MapChangeListener;
+import javafx.scene.image.Image;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
@@ -23,6 +24,7 @@ public class Song extends ItunesTrack{
 	public boolean songAtEnd=true;
 	public boolean playing=false;
 	public boolean setup=false;
+	public Image albumCover;
     public final SimpleIntegerProperty orderName = new SimpleIntegerProperty(originalOrder);
 	@XStreamAlias("TitleName")
     public final SimpleStringProperty titleName = new SimpleStringProperty(name);
@@ -32,16 +34,21 @@ public class Song extends ItunesTrack{
     public final SimpleStringProperty albumName = new SimpleStringProperty(album);
 	@XStreamAlias("genreName")
     public final SimpleStringProperty genreName = new SimpleStringProperty(genre);
-	@XStreamAlias("durationName")
-    public final SimpleStringProperty durationName = new SimpleStringProperty(""+totalTime);
 	@XStreamAlias("playsName")
     public final SimpleIntegerProperty playsName = new SimpleIntegerProperty(playCount);
+	@XStreamAlias("totalTime")
+    public final SimpleStringProperty timeName = new SimpleStringProperty(""+totalTime);
+	@XStreamAlias("kindName")
+    public final SimpleStringProperty kindName = new SimpleStringProperty(kind);
+	
+	
 	
     public String toString() {
         return ("Name: " + name + "\n Artist: " + artist + "\n Album: " + album +"\n Number: "+originalOrder);
         //return ("--");
     }
     public ChangeListener<Duration> progresschangelistener;
+	
    
 
 	public Song(ItunesTrack obj, int oO) {
@@ -62,6 +69,8 @@ public class Song extends ItunesTrack{
         setOrderName(originalOrder);
         setPlaysName(playCount);
         setGenreName(genre);
+        setTimeName(formatTime(new Duration(0), new Duration(totalTime)));
+        setKindName(kind);
         //setDurationName(""+totalTime);
 	}
 	 public Song( URI f, int oO) {
@@ -133,6 +142,43 @@ public class Song extends ItunesTrack{
 	            }
 	        });
 	    }
+	    private static String formatTime(Duration elapsed, Duration duration) {
+	        int intElapsed = (int) Math.floor(elapsed.toSeconds());
+	        int elapsedHours = intElapsed / (60 * 60);
+	        if (elapsedHours > 0) {
+	            intElapsed -= elapsedHours * 60 * 60;
+	        }
+	        int elapsedMinutes = intElapsed / 60;
+	        int elapsedSeconds = intElapsed - elapsedHours * 60 * 60
+	                             - elapsedMinutes * 60;
+
+	        if (duration.greaterThan(Duration.ZERO)) {
+	            int intDuration = (int) Math.floor(duration.toSeconds());
+	            int durationHours = intDuration / (60 * 60);
+	            if (durationHours > 0) {
+	                intDuration -= durationHours * 60 * 60;
+	            }
+	            int durationMinutes = intDuration / 60;
+	            int durationSeconds = intDuration - durationHours * 60 * 60
+	                                  - durationMinutes * 60;
+	           durationSeconds-=1;
+	            if (durationHours > 0) {
+	                return String.format("%d:%02d:%02d",
+	                                     durationHours, durationMinutes, durationSeconds);
+	            } else {
+	                return String.format("%02d:%02d",durationMinutes,
+	                                     durationSeconds);
+	            }
+	        } else {
+	            if (elapsedHours > 0) {
+	                return String.format("%d:%02d:%02d", elapsedHours,
+	                                     elapsedMinutes, elapsedSeconds);
+	            } else {
+	                return String.format("%02d:%02d", elapsedMinutes,
+	                                     elapsedSeconds);
+	            }
+	        }
+	    }
 	    public void startHandling(String url)
 	    {
 	    	  try {
@@ -180,7 +226,7 @@ public class Song extends ItunesTrack{
 	            //System.out.println("-------------------");
 	        }
 	        if (key.equals("image")) {
-	            //albumCover.setImage((javafx.scene.image.Image) value);
+	        		albumCover=(Image)(value);
 	        }
 	        //setDurationName("");
 	        setTitleName(name);
@@ -188,6 +234,7 @@ public class Song extends ItunesTrack{
 	        setAlbumName(album);
 	        setOrderName(originalOrder);
 	        setGenre(genre);
+	        
 	        //System.out.println(getOrderName());
 	    }
 	    public void setURL(String url) {
@@ -226,19 +273,6 @@ public class Song extends ItunesTrack{
 	    public void setGenreName(String fname) {
 	        genreName.set(fname);
 	    }
-	    public void setDurationName(String fname) {
-	        int minTime = (int) song.getTotalDuration().toMinutes();
-	        int secTime = (int) song.getTotalDuration().toSeconds();
-	        if (secTime / 60 >= 1) { // this are to display later something like a clock 19:02:20
-	            secTime %= 60; //if you want just the time in minutes use only the toMinutes()
-	        }
-	        if (minTime / 60 >= 1) {
-	            minTime %= 60;
-	        }
-	        String label = minTime + ":" + secTime;
-	        //System.out.println(label);
-	        durationName.set(label);
-	    }
 	    public void setOrderName(int oO) {
 	        orderName.set(oO);
 	    }
@@ -247,6 +281,20 @@ public class Song extends ItunesTrack{
 		}
 		public void setPointer(URI pointer) {
 			this.pointer = pointer;
+		}
+		public String getTimeName(){
+			return timeName.get();
+		}
+		public void setTimeName(String int1){
+			timeName.set(int1);
+		}
+		public void setKindName(String n)
+		{
+			kindName.set(n);
+		}
+		public String getKindName()
+		{
+			return kindName.get();
 		}
 		 public String getTitleName() {
 		        return titleName.get();

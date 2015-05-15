@@ -3,7 +3,6 @@ package com.musicPlayer.JML;
 
 
 import java.io.BufferedWriter;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -11,22 +10,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import com.thoughtworks.xstream.XStream;
-import com.worldsworstsoftware.itunes.ItunesLibrary;
-import com.worldsworstsoftware.itunes.ItunesTrack;
-import com.worldsworstsoftware.itunes.parser.ItunesLibraryParser;
-import com.worldsworstsoftware.itunes.parser.logging.DefaultParserStatusUpdateLogger;
-import com.worldsworstsoftware.itunes.parser.logging.ParserStatusUpdateLogger;
-import com.worldsworstsoftware.itunes.util.ItunesLibraryFinder;
-import com.worldsworstsoftware.logging.DefaultStatusUpdateLogger;
-import com.worldsworstsoftware.logging.StatusUpdateLogger;
 
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -37,10 +23,8 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.stage.WindowEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
@@ -61,24 +45,29 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.util.Callback;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
-import javafx.util.StringConverter;
+
+import com.thoughtworks.xstream.XStream;
+import com.worldsworstsoftware.itunes.ItunesLibrary;
+import com.worldsworstsoftware.itunes.ItunesTrack;
+import com.worldsworstsoftware.itunes.parser.ItunesLibraryParser;
+import com.worldsworstsoftware.itunes.parser.logging.DefaultParserStatusUpdateLogger;
+import com.worldsworstsoftware.itunes.parser.logging.ParserStatusUpdateLogger;
+import com.worldsworstsoftware.itunes.util.ItunesLibraryFinder;
+import com.worldsworstsoftware.logging.DefaultStatusUpdateLogger;
+import com.worldsworstsoftware.logging.StatusUpdateLogger;
 
 /**
  * @author JEAcomputer
@@ -127,6 +116,8 @@ public class MusicPlayer extends Application {
 	public static String lightMetro;
 	public static String flatTheme;
 	public static String currentTheme;
+	public static String mistSilver;
+	public static String windowsTheme;
 	
 	public Stage eqStage = new Stage();
 	public Stage playlistStage = new Stage();
@@ -177,7 +168,10 @@ public class MusicPlayer extends Application {
 		darkMetro = getClass().getResource("/CSS_skins/DefaultSkin.css").toExternalForm();
 		flatTheme = getClass().getResource("/CSS_skins/flatterFX.css").toExternalForm();
         lightMetro = getClass().getResource("/CSS_skins/LightMetro.css").toExternalForm();
+        mistSilver = getClass().getResource("/CSS_skins/MistSilver.css").toExternalForm();
+        windowsTheme = getClass().getResource("/CSS_skins/WindowsGlass.css").toExternalForm();
         currentTheme = darkMetro;
+        
         
 		equalizerView = new EqualizerView(masterLibrary.get(0), mediaControl, eqStage);
 		equalizerView.hide(eqStage);
@@ -189,6 +183,7 @@ public class MusicPlayer extends Application {
 		playlistTable.setItems(playlists);
 		musicTable.setItems(masterLibrary.songList);
 		Scene musicScene = new Scene(musicBorder, 0, 0);
+		musicScene.getStylesheets().add(currentTheme);
 		primaryStage.setScene(musicScene);
 		musicBorder.setCenter(musicVBox);
 		musicBorder.setBottom(mediaControl);
@@ -237,7 +232,7 @@ public class MusicPlayer extends Application {
 			}
 			
 		});
-		gridBar.add(testButton, 4, 0);
+		//gridBar.add(testButton, 4, 0);
 		searchComboBox.setOnAction((Event ev) -> {
 			try
 			{
@@ -459,9 +454,13 @@ public class MusicPlayer extends Application {
 		TableColumn<Song, String> playsCol = new TableColumn<Song, String>("Plays name");
 		playsCol.setCellValueFactory(new PropertyValueFactory<Song, String>("playsName"));
 		playsCol.setPrefWidth(100);
+		TableColumn<Song, String> timeCol = new TableColumn<Song, String>("Total time");
+		timeCol.setCellValueFactory(new PropertyValueFactory<Song, String>("timeName"));
+		timeCol.setPrefWidth(100);
+		TableColumn<Song, String> kindCol = new TableColumn<Song, String>("Kind");
+		kindCol.setCellValueFactory(new PropertyValueFactory<Song, String>("kindName"));
+		kindCol.setPrefWidth(100);
 
-		TableColumn<Song, String> durationCol = new TableColumn<Song, String>("Duration");
-		durationCol.setCellValueFactory(new PropertyValueFactory<Song, String>("durationName"));
 		TableColumn<Song, String> orderCol = new TableColumn<Song, String>("Order");
 		orderCol.setCellValueFactory(new PropertyValueFactory<Song, String>("orderName"));
 
@@ -485,6 +484,24 @@ public class MusicPlayer extends Application {
 	                EqualizerView.setTheme(currentTheme);
 			}
 		});
+		MenuItem mistThemeMenu = new MenuItem("Mist Theme");
+		mistThemeMenu.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent t) {
+				 musicScene.getStylesheets().remove(currentTheme);
+	                musicScene.getStylesheets().add(mistSilver);
+	                currentTheme = mistSilver;
+	                EqualizerView.setTheme(currentTheme);
+			}
+		});
+		MenuItem windowsThemeMenu = new MenuItem("Windows Theme");
+		windowsThemeMenu.setOnAction(new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent t) {
+				 musicScene.getStylesheets().remove(currentTheme);
+	                musicScene.getStylesheets().add(windowsTheme);
+	                currentTheme = windowsTheme;
+	                EqualizerView.setTheme(currentTheme);
+			}
+		});
 
 		//No Effects menu
 		MenuItem noEffects = new MenuItem("Dark Theme");
@@ -497,7 +514,7 @@ public class MusicPlayer extends Application {
                 EqualizerView.setTheme(currentTheme);
 			}
 		});
-		menuEffect.getItems().addAll(lightSkin, flatThemeMenu, noEffects);
+		menuEffect.getItems().addAll(lightSkin, windowsThemeMenu, mistThemeMenu, flatThemeMenu, noEffects);
 		MenuItem menuAddFiles = new MenuItem("Import MP3's");
 		menuAddFiles.setAccelerator(KeyCombination.keyCombination("Meta+O"));
 		menuAddFiles.setOnAction(new EventHandler<ActionEvent>() {
@@ -513,6 +530,7 @@ public class MusicPlayer extends Application {
 
 			}
 		});
+		
 		MenuItem showEQ = new MenuItem("Equalizer");
 		showEQ.setAccelerator(KeyCombination.keyCombination("Meta+E"));
 		showEQ.setOnAction(new EventHandler<ActionEvent>() {
@@ -528,7 +546,7 @@ public class MusicPlayer extends Application {
 					try
 					{
 						equalizerView.setBottom(mediaControl);
-						eqStage.show();
+						equalizerView.show(eqStage);
 						
 					}
 					catch(IllegalStateException e)
@@ -556,7 +574,7 @@ public class MusicPlayer extends Application {
 		menuFile.getItems().addAll(menuAddFiles, makeNewPlaylist, exit);
 		menuView.getItems().addAll(showEQ,menuEffect);
 
-		musicTable.getColumns().addAll(orderCol, songCol, artistCol, albumCol, genreCol, playsCol);
+		musicTable.getColumns().addAll(orderCol, songCol, artistCol, albumCol, genreCol, timeCol, playsCol, kindCol);
 		musicTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		musicScene.widthProperty().addListener(new ChangeListener<Number>() {
 			@Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
@@ -595,6 +613,22 @@ public class MusicPlayer extends Application {
 						masterLibrary.remove(row.getItem());
 					}
 				});
+				MenuItem showInfo = new MenuItem("Show song info");
+				showInfo.setOnAction(new EventHandler<ActionEvent>() {
+
+					@Override
+					public void handle(ActionEvent event) {
+						// TODO Auto-generated method stub
+						GetInfoPopUp getInfo = new GetInfoPopUp(row.getItem());
+						try {
+							getInfo.start(new Stage());
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					
+				});
 				Menu rightClickAddToPlaylist = new Menu("Add to a playlist");
 				rightClickAddToPlaylist.setOnAction(new EventHandler<ActionEvent>() {
 					public void handle(ActionEvent e) {
@@ -616,7 +650,9 @@ public class MusicPlayer extends Application {
 				rightClickEvents.getItems().add(rightClickPlay);
 				rightClickEvents.getItems().add(rightClickPause);
 				rightClickEvents.getItems().add(remove);
+				rightClickEvents.getItems().add(showInfo);
 				rightClickEvents.getItems().add(rightClickAddToPlaylist);
+				
 				row.addEventHandler(MouseEvent.MOUSE_CLICKED,
 				new EventHandler<MouseEvent>() {
 					@Override public void handle(MouseEvent e) {
@@ -633,6 +669,7 @@ public class MusicPlayer extends Application {
 					if (masterLibrary.contains(row.getItem())) {
 						
 						play(row.getItem());
+						equalizerView.show(eqStage);
 						System.out.println("PRINTING");
 					}
 				}
@@ -674,11 +711,9 @@ public class MusicPlayer extends Application {
 		masterLibrary.indexOfPlaying=s.getOrder();
 		setMediaControl(s);
 		equalizerView.setSong(s);
-		if(equalizerView.open==true)
-		{
-			equalizerView.setBottom(mediaControl);
+		equalizerView.setBottom(mediaControl);
 			System.out.println("Set the bottom!");
-		}
+		
 		//masterLibrary.play(masterLibrary.indexOf(s));
 
 	}

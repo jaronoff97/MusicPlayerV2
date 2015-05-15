@@ -1,6 +1,8 @@
 package com.musicPlayer.JML;
 
 
+import java.util.Collection;
+
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -14,6 +16,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -59,6 +63,7 @@ public class PlayerControl extends BorderPane {
     	        };
     		mvPane.setStyle("-fx-background-color: black;");
         setCenter(mvPane);
+       
         mediaBar = new HBox();
         mediaBar.setAlignment(Pos.CENTER);
         mediaBar.setPadding(new Insets(5, 10, 5, 10));
@@ -81,10 +86,14 @@ public class PlayerControl extends BorderPane {
         System.out.println(s);
         duration = s.getSong().getMedia().getDuration();
         setStyle("-fx-background-color: #bfc2c7;");
+        
         mediaView = new MediaView(song.getSong());
+       
         Pane mvPane = new Pane() {
         };
         mvPane.getChildren().add(mediaView);
+        mvPane.setMinSize(song.getSong().getMedia().getWidth(), song.getSong().getMedia().getWidth());
+        
         mvPane.setStyle("-fx-background-color: black;");
         setCenter(mvPane);
 

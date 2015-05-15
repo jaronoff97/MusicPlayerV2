@@ -3,11 +3,13 @@ package com.musicPlayer.JML;
 
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.BorderPane;
@@ -40,7 +42,6 @@ public boolean open=false;
 			scene = new Scene(borderPane, 800,500);
 			currentTheme=MusicPlayer.currentTheme;
 			setTheme(currentTheme);
-			
 			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>(){
 
 				@Override
@@ -72,6 +73,7 @@ public boolean open=false;
 		
 		playerControl = p;
 		setSong(song);
+
 		try {
 			start(stage);
 		} catch (Exception e) {
@@ -175,7 +177,7 @@ public boolean open=false;
 	public void setGrid(GridPane grid) {
 		this.grid = grid;
 	}
-	public static void show(Stage s)
+	public void show(Stage s)
 	{
 		s.show();
 	}
