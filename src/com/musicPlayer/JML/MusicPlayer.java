@@ -896,7 +896,5 @@ public class MusicPlayer extends Application {
 			return (minTime + ":" + secTime);
 		}
 
-
 	}
-
 }

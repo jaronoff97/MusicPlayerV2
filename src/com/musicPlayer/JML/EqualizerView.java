@@ -1,8 +1,22 @@
 package com.musicPlayer.JML;
 
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Enumeration;
+
+import gnu.io.CommPort;
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
 import javafx.application.Application;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -20,9 +34,9 @@ import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class EqualizerView extends Application{
+public class EqualizerView extends Application implements SerialPortEventListener{
 private static final double START_FREQ = 250.0;
-private static final int BAND_COUNT = 10;
+private static final int BAND_COUNT = 8;
 private SpectrumBar[] spectrumBars;
 private SpectrumListener spectrumListener;
 private Song song;
@@ -33,7 +47,15 @@ private static String currentTheme;
 private PlayerControl playerControl;
 public boolean initialized=false;
 public boolean open=false;
+SerialPort serialPort;
+public boolean begunSerial=false;
+/** Streams */
+private InputStream    serialIn;
+private OutputStream   serialOut;
+private BufferedReader serialReader;
+private Thread thread;
 
+		
 		@Override
 		public void start(Stage primaryStage) throws Exception {
 	// TODO Auto-generated method stub
@@ -43,7 +65,6 @@ public boolean open=false;
 			currentTheme=MusicPlayer.currentTheme;
 			setTheme(currentTheme);
 			primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>(){
-
 				@Override
 				public void handle(WindowEvent event) {
 					// TODO Auto-generated method stub
@@ -64,7 +85,12 @@ public boolean open=false;
 		}
 		public EqualizerView()
 		{
-			
+			try {
+				begin();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	public EqualizerView(Song s, PlayerControl p, Stage stage) {
 		
@@ -73,14 +99,70 @@ public boolean open=false;
 		
 		playerControl = p;
 		setSong(song);
-
 		try {
 			start(stage);
+			begin();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		
 		// TODO Auto-generated constructor stub
+	}
+	public void begin() throws Exception{
+		 final String PORT_NAMES[] = { 
+	        "/dev/tty.usbmodem", // Mac OS X
+//	        "/dev/usbdev", // Linux
+//	        "/dev/tty", // Linux
+//	        "/dev/serial", // Linux
+//	        "COM3", // Windows
+	    };
+		 CommPortIdentifier portId = null;
+         Enumeration portEnum = CommPortIdentifier.getPortIdentifiers();
+		// Open port
+		 while (portId == null && portEnum.hasMoreElements()) {
+             // Iterate through your host computer's serial port IDs
+             //
+             CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
+             System.out.println( "   port" + currPortId.getName() );
+             for (String portName : PORT_NAMES) {
+                 if ( currPortId.getName().equals(portName) 
+                   || currPortId.getName().startsWith(portName)) {
+
+                     // Try to connect to the Arduino on this port
+                     //
+                     // Open serial port
+                     serialPort = (SerialPort)currPortId.open(this.getClass().getName(), 2000);
+                     portId = currPortId;
+                     System.out.println( "Connected on port" + currPortId.getName() );
+                     break;
+                 }
+             }
+         }
+
+        serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+		serialIn=serialPort.getInputStream();
+		serialOut=serialPort.getOutputStream();
+		serialReader = new BufferedReader( new InputStreamReader(serialIn) );
+        serialPort.addEventListener(this);
+        serialPort.notifyOnDataAvailable(true);
+        PrintStream printStream = new PrintStream(serialOut);
+        Task<Void> task = new Task<Void>() {
+            @Override public Void call() {
+            	for(int i=0;i<spectrumBars.length;i++)
+            	{
+            		printStream.print(("I"+i+"B"+spectrumBars[i].getBarCount()));
+            		System.out.println(("I"+i+"B"+spectrumBars[i].getBarCount()));
+            	}
+            		
+				return null;
+               
+            }
+        };
+        thread=new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
 	}
 	public void setSong(Song song1)
 	{
@@ -195,6 +277,18 @@ public boolean open=false;
     		currentTheme=string;
     		scene.getStylesheets().add(currentTheme);
     }
+	@Override
+	public void serialEvent(SerialPortEvent arg0) {
+		// TODO Auto-generated method stub
+		try {
+			String line = serialReader.readLine();
+			if(line.startsWith("SS:") && line.length()==14){
+				
+			}
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
 
 	
 }

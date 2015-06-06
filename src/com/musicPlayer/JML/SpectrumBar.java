@@ -98,7 +98,10 @@ public class SpectrumBar extends VBox {
     
     super.layoutChildren();
   }
-  
+  public int getBarCount()
+  {
+	  return barCount;
+  }
   private double computeWidthForHeight(double barHeight) {
     double hpadding = getHorizontalPadding();
     return barHeight * ASPECT_RATIO + hpadding;
