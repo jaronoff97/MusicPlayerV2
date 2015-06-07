@@ -1,5 +1,7 @@
 package com.musicPlayer.JML;
 
+import java.io.IOException;
+
 import javafx.scene.media.AudioSpectrumListener;
 import javafx.scene.media.MediaPlayer;
 
@@ -8,6 +10,7 @@ public class SpectrumListener implements AudioSpectrumListener {
 	  private double minValue;
 	  private double[] norms;
 	  private int[] spectrumBucketCounts;
+	  private int index=0;
 
 	  SpectrumListener(double startFreq, MediaPlayer mp, SpectrumBar[] bars) {
 	    this.bars = bars;
@@ -31,6 +34,14 @@ public class SpectrumListener implements AudioSpectrumListener {
 	      
 	      if (currentBucketCount >= spectrumBucketCounts[bucketIndex]) {
 	        bars[bucketIndex].setValue(sum / norms[bucketIndex]);
+	        EqualizerView.printStream.print(("I"+bucketIndex+"B"+bars[bucketIndex].getBarCount()));
+	        //System.out.println(("I"+bucketIndex+"B"+bars[bucketIndex].getBarCount()));
+	        try {
+				System.out.println(EqualizerView.serialReader.readLine());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	        currentBucketCount = 0;
 	        sum = 0.0;
 	        ++bucketIndex;

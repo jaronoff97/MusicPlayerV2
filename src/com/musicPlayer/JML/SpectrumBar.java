@@ -26,6 +26,8 @@ public class SpectrumBar extends VBox {
   private double lastWidth = 0;
   private double lastHeight = 0;
   
+  private int barsLit;
+  
   public SpectrumBar(int maxValue, int barCount) {
     this.maxValue = maxValue;
     this.barCount = barCount;
@@ -51,7 +53,7 @@ public class SpectrumBar extends VBox {
   }
   
   public void setValue(double value) {
-    int barsLit = Math.min(barCount, (int)Math.round(value/maxValue*barCount));
+    barsLit = Math.min(barCount, (int)Math.round(value/maxValue*barCount));
     ObservableList<Node> childList = getChildren();
     for (int i = 0; i < childList.size(); i++) {
       childList.get(i).setVisible(i > barCount - barsLit);
@@ -100,7 +102,7 @@ public class SpectrumBar extends VBox {
   }
   public int getBarCount()
   {
-	  return barCount;
+	  return barCount-barsLit;
   }
   private double computeWidthForHeight(double barHeight) {
     double hpadding = getHorizontalPadding();

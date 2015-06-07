@@ -52,8 +52,8 @@ public boolean begunSerial=false;
 /** Streams */
 private InputStream    serialIn;
 private OutputStream   serialOut;
-private BufferedReader serialReader;
-private Thread thread;
+public static BufferedReader serialReader;
+public static PrintStream printStream;
 
 		
 		@Override
@@ -147,22 +147,7 @@ private Thread thread;
 		serialReader = new BufferedReader( new InputStreamReader(serialIn) );
         serialPort.addEventListener(this);
         serialPort.notifyOnDataAvailable(true);
-        PrintStream printStream = new PrintStream(serialOut);
-        Task<Void> task = new Task<Void>() {
-            @Override public Void call() {
-            	for(int i=0;i<spectrumBars.length;i++)
-            	{
-            		printStream.print(("I"+i+"B"+spectrumBars[i].getBarCount()));
-            		System.out.println(("I"+i+"B"+spectrumBars[i].getBarCount()));
-            	}
-            		
-				return null;
-               
-            }
-        };
-        thread=new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
+       printStream = new PrintStream(serialOut);
 	}
 	public void setSong(Song song1)
 	{
